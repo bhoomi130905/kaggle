@@ -1,0 +1,52 @@
+BE AIDS – CL-II
+QUANTUM AI
+PRACTICAL 4: Implement Quantum Teleportation Algorithm in Python
+
+NOTE:
+Uses local simulation and Qiskit dynamic-circuit if_test syntax. No IBM Quantum account, API key, or physical quantum computer is required.
+
+# Quantum teleportation of a one-qubit state using Qiskit Aer.
+# Install: python -m pip install qiskit qiskit-aer
+
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import AerSimulator
+
+theta = 1.0  # test state |psi> = cos(theta/2)|0> + sin(theta/2)|1>
+
+# q0: message qubit; q1: Alice's entangled qubit; q2: Bob's qubit.
+# Classical bits c0,c1 hold Alice's measurement outcomes.
+qc = QuantumCircuit(3, 2)
+
+qc.ry(theta, 0)          # Prepare the state to teleport
+qc.h(1)
+qc.cx(1, 2)              # Create shared Bell pair between q1 and q2
+
+qc.cx(0, 1)              # Bell-basis operation by Alice
+qc.h(0)
+qc.barrier()
+
+qc.measure(0, 0)         # Alice measures message qubit
+qc.measure(1, 1)         # Alice measures her Bell-pair qubit
+
+# Bob's corrections: X if c1=1, then Z if c0=1.
+with qc.if_test((qc.clbits[1], 1)):
+    qc.x(2)
+with qc.if_test((qc.clbits[0], 1)):
+    qc.z(2)
+
+print(qc.draw())
+
+backend = AerSimulator()
+compiled = transpile(qc, backend)
+counts = backend.run(compiled, shots=1024).result().get_counts()
+print("Alice's classical measurement outcomes:", counts)
+-
+
+# Verify the protocol conceptually:
+# After Bob's conditional X/Z corrections, q2 carries the original |psi>
+# state (up to global phase). The classical bits are required for the
+# corrections; teleportation does not transmit information faster than light.
+#
+# To test another real-amplitude input state, change theta above.
+# A fully general unknown qubit may also have a relative phase; it can be
+# prepared with RY(theta) followed by RZ(phi) before the protocol.

@@ -1,0 +1,10 @@
+# Install with: python -m pip install -r requirements.txt
+qiskit>=1.0
+qiskit-aer>=0.14
+numpy
+pandas
+matplotlib
+scikit-learn
+scipy
+nltk
+pgmpy>=0.1.25

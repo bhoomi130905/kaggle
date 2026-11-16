@@ -1,0 +1,67 @@
+BE AIDS – CL-II
+QUANTUM AI
+PRACTICAL 2: Tackle Noise with Error Correction
+
+NOTE:
+This is a bit-flip repetition code demonstration, not a general correction code for arbitrary X, Y and Z errors. Syndrome extraction is shown explicitly; recovery is explained in the following block.
+
+# Three-qubit repetition code for a bit-flip (X) error.
+# Install: python -m pip install qiskit qiskit-aer
+
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import AerSimulator
+
+def make_bit_flip_code(error_qubit=None):
+    # q0 is the data qubit; q1,q2 are encoding qubits.
+    # q3,q4 store the two parity-check syndrome bits.
+    qc = QuantumCircuit(5, 2)
+
+    # Prepare logical |1>. Replace this X with RY(theta) to test an arbitrary
+    # real-amplitude state, noting that this repetition code corrects X errors.
+    qc.x(0)
+
+    # Encode |1> as |111>; |0> would encode as |000>.
+    qc.cx(0, 1)
+    qc.cx(0, 2)
+
+    # Inject a single bit-flip error for demonstration.
+    if error_qubit in (0, 1, 2):
+        qc.x(error_qubit)
+
+    # Syndrome extraction: s0=q0 XOR q1; s1=q1 XOR q2.
+    qc.cx(0, 3)
+    qc.cx(1, 3)
+    qc.cx(1, 4)
+    qc.cx(2, 4)
+
+    # Measure only syndrome ancillas; data remains unmeasured here.
+    qc.measure(3, 0)
+    qc.measure(4, 1)
+    return qc
+
+backend = AerSimulator()
+for error in [None, 0, 1, 2]:
+    circuit = make_bit_flip_code(error)
+    compiled = transpile(circuit, backend)
+    counts = backend.run(compiled, shots=100).result().get_counts()
+    print("Injected X error on:", error, "Syndrome counts:", counts)
+-
+
+# Classical syndrome interpretation.
+def decode_syndrome(s0, s1):
+    lookup = {
+        (0, 0): "No error",
+        (1, 0): "Bit flip on q0",
+        (1, 1): "Bit flip on q1",
+        (0, 1): "Bit flip on q2"
+    }
+    return lookup[(s0, s1)]
+
+for syndrome in [(0,0), (1,0), (1,1), (0,1)]:
+    print(syndrome, ":", decode_syndrome(*syndrome))
+-
+
+# Conditional recovery demonstration using the measured syndrome.
+# In the above circuit the syndrome bits are classical outputs. The decoder
+# identifies which data qubit needs X. In hardware, apply that X correction
+# with classical feed-forward before measuring/using the logical data.

@@ -1,0 +1,56 @@
+BE AIDS – CL-II
+INFORMATION RETRIEVAL
+PRACTICAL 2: Document Retrieval Using Inverted Files
+
+NOTE:
+Uses an in-memory collection so no external dataset is required. The included sample_document.txt is used in Practical 1.
+
+# Build an inverted index and retrieve documents using postings lists.
+import re
+from collections import defaultdict
+
+documents = {
+    "D1": "The quick brown fox jumps over the lazy dog",
+    "D2": "The lazy dog sleeps in the warm sun",
+    "D3": "Information retrieval finds relevant documents",
+    "D4": "The fox is quick and the dog is lazy"
+}
+
+def tokenize(text):
+    return re.findall(r"[a-z0-9]+", text.lower())
+
+inverted_index = defaultdict(set)
+for doc_id, content in documents.items():
+    for term in set(tokenize(content)):
+        inverted_index[term].add(doc_id)
+
+print("INVERTED INDEX")
+for term in sorted(inverted_index):
+    print(term, "->", sorted(inverted_index[term]))
+-
+
+# Boolean AND retrieval: return documents containing every query term.
+def retrieve_and(query):
+    terms = tokenize(query)
+    if not terms:
+        return set()
+    postings = [inverted_index.get(term, set()) for term in terms]
+    return set.intersection(*(set(p) for p in postings))
+
+query = "quick fox"
+matching_docs = retrieve_and(query)
+print("Query:", query)
+print("Matching document IDs:", sorted(matching_docs))
+for doc_id in sorted(matching_docs):
+    print(doc_id, ":", documents[doc_id])
+-
+
+# Boolean OR retrieval: return documents containing at least one query term.
+def retrieve_or(query):
+    terms = tokenize(query)
+    result = set()
+    for term in terms:
+        result.update(inverted_index.get(term, set()))
+    return result
+
+print("OR query results:", sorted(retrieve_or("quick information")))

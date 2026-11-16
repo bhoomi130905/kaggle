@@ -1,0 +1,54 @@
+BE AIDS – CL-II
+QUANTUM AI
+PRACTICAL 5: Implementing a 5-Qubit Quantum Fourier Transform
+
+NOTE:
+Local simulator only. QFT measurement counts are samples from the transformed state; the circuit diagram is the direct representation of the transform.
+
+# Construct a 5-qubit Quantum Fourier Transform (QFT) circuit manually.
+# Install: python -m pip install qiskit qiskit-aer numpy
+
+import numpy as np
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import AerSimulator
+
+def create_qft_circuit(number_of_qubits):
+    circuit = QuantumCircuit(number_of_qubits, name="QFT")
+    for target in range(number_of_qubits):
+        circuit.h(target)
+        for control in range(target + 1, number_of_qubits):
+            angle = np.pi / (2 ** (control - target))
+            circuit.cp(angle, control, target)
+    # Reverse output order (bit-reversal swaps).
+    for i in range(number_of_qubits // 2):
+        circuit.swap(i, number_of_qubits - 1 - i)
+    return circuit
+
+qft5 = create_qft_circuit(5)
+print("5-qubit QFT circuit:")
+print(qft5.draw())
+-
+
+# Apply QFT to a basis input and sample its output.
+# Prepare |00101> in Qiskit's qubit-index convention.
+demo = QuantumCircuit(5, 5)
+demo.x(0)
+demo.x(2)
+demo.compose(qft5, inplace=True)
+demo.measure(range(5), range(5))
+
+backend = AerSimulator()
+compiled = transpile(demo, backend)
+counts = backend.run(compiled, shots=2048).result().get_counts()
+print("QFT measurement counts:")
+print(counts)
+-
+
+# Optional circuit inverse check (QFT followed by inverse QFT).
+check = QuantumCircuit(5)
+check.x(0)
+check.x(2)
+check.compose(qft5, inplace=True)
+check.compose(qft5.inverse(), inplace=True)
+print("QFT followed by inverse QFT:")
+print(check.draw())

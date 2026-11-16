@@ -1,0 +1,1 @@
+Information retrieval systems index documents and retrieve relevant information. Text preprocessing removes stop words and applies stemming before indexing.

@@ -1,0 +1,48 @@
+BE AIDS – CL-II
+INFORMATION RETRIEVAL
+PRACTICAL 1: Text Document Pre-processing: Stop-word Removal and Stemming
+
+NOTE:
+The notebook uses a regex tokenizer so the practical does not depend on downloading the Punkt tokenizer model. NLTK's English stopword corpus is downloaded once if absent.
+
+# Text pre-processing using NLTK.
+# Install: python -m pip install nltk
+
+import re
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+
+# Download the required NLTK stopword list once (internet needed only first time).
+nltk.download("stopwords", quiet=True)
+
+document = """Information Retrieval systems retrieve relevant documents.
+The systems are retrieving information from different document collections."""
+
+# Normalize case and tokenize words using a regular expression.
+tokens = re.findall(r"[a-zA-Z]+", document.lower())
+print("Original tokens:", tokens)
+
+stop_words = set(stopwords.words("english"))
+without_stopwords = [word for word in tokens if word not in stop_words]
+print("After stop-word removal:", without_stopwords)
+
+stemmer = PorterStemmer()
+stemmed_words = [stemmer.stem(word) for word in without_stopwords]
+print("After stemming:", stemmed_words)
+-
+
+# Process a text file from the included datasets directory.
+from pathlib import Path
+import re
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+
+file_path = Path("datasets/sample_document.txt")
+text = file_path.read_text(encoding="utf-8")
+words = re.findall(r"[a-zA-Z]+", text.lower())
+stop_words = set(stopwords.words("english"))
+filtered_words = [w for w in words if w not in stop_words]
+stemmer = PorterStemmer()
+result = [stemmer.stem(w) for w in filtered_words]
+print("Processed document:", " ".join(result))

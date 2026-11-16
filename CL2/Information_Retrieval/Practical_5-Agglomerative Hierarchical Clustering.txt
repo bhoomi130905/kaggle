@@ -1,0 +1,52 @@
+BE AIDS – CL-II
+INFORMATION RETRIEVAL
+PRACTICAL 5: Agglomerative Hierarchical Clustering
+
+NOTE:
+The included customer_clustering.csv is a small synthetic numeric dataset designed for offline execution. The original class notebook refers to CC_GENERAL.csv; see DATASET_NOTES.txt for the dataset note.
+
+# Agglomerative clustering on the included customer-style numeric dataset.
+# Install: python -m pip install pandas numpy matplotlib scipy scikit-learn
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+data = pd.read_csv("datasets/customer_clustering.csv")
+features = data.select_dtypes(include="number")
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(features)
+
+# Dendrogram using Ward linkage.
+Z = linkage(X_scaled, method="ward")
+plt.figure(figsize=(10, 5))
+dendrogram(Z, truncate_mode="lastp", p=20)
+plt.title("Agglomerative Hierarchical Clustering Dendrogram")
+plt.xlabel("Cluster/sample index")
+plt.ylabel("Ward distance")
+plt.tight_layout()
+plt.show()
+-
+
+# Fit models for different cluster counts and compare silhouette scores.
+for k in [2, 3, 4, 5]:
+    clustering = AgglomerativeClustering(n_clusters=k, linkage="ward")
+    labels = clustering.fit_predict(X_scaled)
+    score = silhouette_score(X_scaled, labels)
+    print(f"k={k}, silhouette score={score:.4f}")
+-
+
+# Visualize a two-feature clustering result.
+clustering = AgglomerativeClustering(n_clusters=3, linkage="ward")
+labels = clustering.fit_predict(X_scaled)
+
+plt.figure(figsize=(7, 5))
+plt.scatter(X_scaled[:, 0], X_scaled[:, 1], c=labels)
+plt.title("Agglomerative Clustering (3 clusters)")
+plt.xlabel(features.columns[0] + " (scaled)")
+plt.ylabel(features.columns[1] + " (scaled)")
+plt.tight_layout()
+plt.show()

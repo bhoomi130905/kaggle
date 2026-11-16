@@ -1,0 +1,62 @@
+BE AIDS – CL-II
+INFORMATION RETRIEVAL
+PRACTICAL 3: Bayesian Network for Heart Disease Diagnosis
+
+NOTE:
+The supplied class reference notebook specifies the Cleveland Heart Disease dataset and pgmpy-style Bayesian inference. The ZIP includes a clearly labelled synthetic demo CSV to make the code runnable offline; it is not a substitute for the standard Cleveland dataset. Official dataset acquisition is listed in DATASET_NOTES.txt.
+
+# Bayesian network with discrete variables using pgmpy.
+# Install: python -m pip install pandas numpy pgmpy
+
+import pandas as pd
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.estimators import MaximumLikelihoodEstimator
+from pgmpy.inference import VariableElimination
+
+# Dataset included: datasets/heart_disease_demo.csv
+# This is a small synthetic teaching dataset, NOT the official Cleveland
+# Heart Disease dataset. Replace with the official dataset for formal analysis.
+data = pd.read_csv("datasets/heart_disease_demo.csv")
+
+# Variables are discretized categories to keep conditional probability
+# tables manageable and make evidence values explicit.
+model = DiscreteBayesianNetwork([
+    ("age_group", "heart_disease"),
+    ("chest_pain", "heart_disease"),
+    ("cholesterol", "heart_disease"),
+    ("exercise_angina", "heart_disease")
+])
+
+model.fit(data, estimator=MaximumLikelihoodEstimator)
+print("Learned CPDs:")
+for cpd in model.get_cpds():
+    print(cpd)
+-
+
+# Infer the probability of heart disease for a patient with given evidence.
+inference = VariableElimination(model)
+
+query = inference.query(
+    variables=["heart_disease"],
+    evidence={
+        "age_group": "middle",
+        "chest_pain": "typical",
+        "cholesterol": "high",
+        "exercise_angina": "yes"
+    }
+)
+print("P(heart_disease | patient evidence):")
+print(query)
+-
+
+# Example: query with a different patient profile.
+query2 = inference.query(
+    variables=["heart_disease"],
+    evidence={
+        "age_group": "young",
+        "chest_pain": "none",
+        "cholesterol": "normal",
+        "exercise_angina": "no"
+    }
+)
+print(query2)

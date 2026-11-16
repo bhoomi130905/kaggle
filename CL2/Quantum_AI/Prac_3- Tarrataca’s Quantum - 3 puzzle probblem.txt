@@ -1,0 +1,83 @@
+BE AIDS – CL-II
+QUANTUM AI
+PRACTICAL 3: Tarrataca’s Quantum Production System with the 3-Puzzle Problem
+
+NOTE:
+The supplied class notebook for Practical 3 used coin-flipping examples rather than the specified 3-puzzle. This file implements the specified 3-puzzle production rules, while clearly distinguishing the classical reference solver from a full quantum Tarrataca implementation.
+
+# Production-system model for the 3-puzzle.
+# A state is a tuple of 9 values; 0 denotes the blank.
+# The production rules move the blank one legal square.
+
+from collections import deque
+
+START = (1, 2, 3,
+         4, 0, 6,
+         7, 5, 8)
+GOAL = (1, 2, 3,
+        4, 5, 6,
+        7, 8, 0)
+
+def apply_production_rules(state):
+    blank = state.index(0)
+    row, col = divmod(blank, 3)
+    moves = [(-1, 0, "UP"), (1, 0, "DOWN"),
+             (0, -1, "LEFT"), (0, 1, "RIGHT")]
+    successors = []
+    for dr, dc, rule_name in moves:
+        nr, nc = row + dr, col + dc
+        if 0 <= nr < 3 and 0 <= nc < 3:
+            j = nr * 3 + nc
+            next_state = list(state)
+            next_state[blank], next_state[j] = next_state[j], next_state[blank]
+            successors.append((tuple(next_state), rule_name))
+    return successors
+
+def breadth_first_production_search(start, goal):
+    queue = deque([(start, [])])
+    visited = {start}
+    while queue:
+        state, path = queue.popleft()
+        if state == goal:
+            return path
+        for next_state, rule in apply_production_rules(state):
+            if next_state not in visited:
+                visited.add(next_state)
+                queue.append((next_state, path + [(rule, next_state)]))
+    return None
+
+solution = breadth_first_production_search(START, GOAL)
+print("Start state:", START)
+print("Goal state :", GOAL)
+print("Production sequence:")
+if solution is None:
+    print("No solution found.")
+else:
+    for step, (rule, state) in enumerate(solution, start=1):
+        print(step, rule, "=>", state)
+    print("Total moves:", len(solution))
+-
+
+# Display the board after each production.
+def show_board(state):
+    for r in range(3):
+        print(state[3*r:3*r+3])
+    print()
+
+print("Initial state:")
+show_board(START)
+if solution:
+    for rule, state in solution:
+        print("Apply rule:", rule)
+        show_board(state)
+-
+
+# Important theoretical context for viva:
+# A production system has (1) a state space, (2) production rules and
+# (3) a control strategy. This executable program explicitly models these
+# components and uses breadth-first search to solve the 3-puzzle.
+#
+# Tarrataca's Quantum Production System is a quantum formulation. This
+# practical script is a classical production-system reference implementation
+# for the puzzle, NOT a full quantum circuit implementation of Tarrataca's
+# algorithm. Do not claim that BFS itself is quantum.

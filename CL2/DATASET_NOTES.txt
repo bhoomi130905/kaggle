@@ -1,0 +1,32 @@
+DATASET NOTES – PLEASE READ
+
+1) Information_Retrieval/datasets/heart_disease_demo.csv
+   - Small SYNTHETIC categorical teaching data, included so the Bayesian Network
+     practical runs offline.
+   - It is NOT the official Cleveland Heart Disease dataset and must not be
+     represented as clinical data or used for medical decisions.
+   - The reference practical notebook you supplied reads ./datasets/heart.csv
+     and describes Cleveland Heart Disease data. For syllabus-level submission
+     using the standard dataset, obtain the Cleveland dataset from the UCI
+     Machine Learning Repository (Heart Disease dataset), use the processed
+     Cleveland file, clean missing '?' values, and discretize continuous fields
+     into categories matching the network's variables. Keep the data source
+     and any preprocessing in your practical record.
+
+2) Information_Retrieval/datasets/spam.csv
+   - Small SYNTHETIC labelled sample emails (ham/spam), included for a runnable
+     demonstration. For a proper evaluation, use a recognized labelled corpus
+     such as the UCI SMS Spam Collection or a permitted email spam corpus.
+   - This sample is not a benchmark dataset and accuracy on it is not meaningful.
+
+3) Information_Retrieval/datasets/customer_clustering.csv
+   - Synthetic numeric customer-style data, included to make agglomerative
+     clustering and dendrogram plotting run offline.
+   - Your supplied reference notebook uses CC_GENERAL.csv (credit-card customer
+     dataset). If your instructor expects that dataset, obtain the authorized
+     CC_GENERAL.csv and update the path in Practical_5.txt.
+
+4) Information_Retrieval/datasets/sample_document.txt
+   - Small local text file for preprocessing practical.
+
+Quantum AI practicals use generated circuits and do not require external datasets.
